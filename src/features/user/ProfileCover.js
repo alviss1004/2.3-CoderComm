@@ -45,6 +45,12 @@ function ProfileCover({ profile }) {
     friendship,
   } = profile;
 
+  const handleError = (e) => {
+    const imgIndex = Math.floor(Math.random() * 5) + 1;
+    e.target.src = `/covers/cover_${imgIndex}.jpg`;
+    e.target.onError = null;
+  };
+
   const friendStatus = (
     <FriendStatus
       sx={{ mt: 1 }}
@@ -92,7 +98,13 @@ function ProfileCover({ profile }) {
         </Box>
       </InfoStyle>
       <Box sx={{ overflow: "hidden" }}>
-        <img src={coverUrl} alt="profile cover" width="100%" height="100%" />
+        <img
+          src={coverUrl}
+          alt="profile cover"
+          width="100%"
+          height="100%"
+          onError={handleError}
+        />
       </Box>
     </RootStyle>
   );
