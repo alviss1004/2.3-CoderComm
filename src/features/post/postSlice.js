@@ -62,8 +62,9 @@ const slice = createSlice({
     editPostSuccess(state, action) {
       state.isLoading = false;
       state.error = null;
-      const { postId, content } = action.payload;
+      const { postId, content, image } = action.payload;
       state.postsById[postId].content = content;
+      state.postsById[postId].image = image;
     },
   },
 });
@@ -73,6 +74,7 @@ export const createPost =
   async (dispatch) => {
     dispatch(slice.actions.startLoading());
     try {
+      console.log("CONTENT", content);
       // upload image to cloudinary
       const imageUrl = await cloudinaryUpload(image);
       const response = await apiService.post("/posts", {
@@ -81,6 +83,30 @@ export const createPost =
       });
       dispatch(slice.actions.createPostSuccess(response.data));
       toast.success("Post successfully");
+    } catch (error) {
+      dispatch(slice.actions.hasError(error.message));
+      toast.error(error.message);
+    }
+  };
+
+export const editPost =
+  ({ content, image, postId }) =>
+  async (dispatch) => {
+    dispatch(slice.actions.startLoading());
+    try {
+      const imageUrl = await cloudinaryUpload(image);
+      const response = await apiService.put(`/posts/${postId}`, {
+        content,
+        image: imageUrl,
+      });
+      dispatch(
+        slice.actions.editPostSuccess({
+          content: response.data,
+          image: response.data,
+          postId,
+        })
+      );
+      toast.success("Post Edited Successfully");
     } catch (error) {
       dispatch(slice.actions.hasError(error.message));
       toast.error(error.message);
@@ -140,17 +166,5 @@ export const deletePost =
       toast.error(error.message);
     }
   };
-
-export const editPost = (postId) => async (dispatch) => {
-  dispatch(slice.actions.startLoading());
-  try {
-    const response = await apiService.put(`/posts/${postId}`);
-    dispatch(slice.actions.editPostSuccess({ content: response.data, postId }));
-    toast.success("Post edited Successfully");
-  } catch (error) {
-    dispatch(slice.actions.hasError(error.message));
-    toast.error(error.message);
-  }
-};
 
 export default slice.reducer;

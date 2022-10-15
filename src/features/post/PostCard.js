@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Box,
   Link,
@@ -18,7 +18,7 @@ import CommentForm from "../comment/CommentForm";
 import CommentList from "../comment/CommentList";
 import useAuth from "../../hooks/useAuth";
 import { useDispatch } from "react-redux";
-import { deletePost, editPost } from "./postSlice";
+import { deletePost } from "./postSlice";
 import EditIcon from "@mui/icons-material/Edit";
 import Button from "@mui/material/Button";
 import Dialog from "@mui/material/Dialog";
@@ -28,9 +28,11 @@ import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { useTheme } from "@mui/material/styles";
+import EditPostForm from "./EditPostForm";
 
 function PostCard({ post }) {
   const { user } = useAuth();
+  const [isEditing, setIsEditing] = useState(false);
   const dispatch = useDispatch();
   const postId = post._id;
   const userId = post.author._id;
@@ -52,11 +54,15 @@ function PostCard({ post }) {
     setOpen(false);
   };
 
-  const handleEdit = () => {
-    dispatch(() => editPost(post._id));
+  const toggleEdit = () => {
+    setIsEditing(!isEditing);
   };
 
-  return (
+  return isEditing ? (
+    <>
+      <EditPostForm post={post} toggleEdit={toggleEdit} />
+    </>
+  ) : (
     <Card>
       <CardHeader
         disableTypography
@@ -85,7 +91,7 @@ function PostCard({ post }) {
         action={
           user._id === post.author._id ? (
             <>
-              <IconButton onClick={handleEdit}>
+              <IconButton onClick={toggleEdit}>
                 <EditIcon sx={{ fontSize: 30 }} />
               </IconButton>
               <IconButton aria-label="delete" onClick={handleClickOpen}>
